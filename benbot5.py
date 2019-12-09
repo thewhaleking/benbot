@@ -75,7 +75,7 @@ def append_menu_to_g_sheet(menu: list, meal_type: str, week_number: int, year_nu
     Appends the menu list to the Google Sheet, and then syncs the local sqlite db with the new info
     :param menu: List of the menu by the days, Monday - Friday
     :param meal_type: 'lunch' or 'dinner'
-    :param week_number: a datetime.date object for any date during the week to be updated
+    :param week_number: number for the week of the year
     :param year_number: four-digit int of year number (e.g. 2019, 2020)
     """
     wks = sheets.open_by_key(CONFIG['sheet_key']).worksheet_by_title(meal_type)
