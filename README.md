@@ -16,4 +16,6 @@ Slack bot that reads lunch/dinner menus, stores them, and regurgitates this info
 Two identital worksheets (tabs) in a single Spreadsheet, named `lunch` and `dinner`, each with 
 the following structure (just a header row):
 
-| Year | Week | Monday | Tuesday | Wednesday | Thursday | Friday |
+| Year   | Week  | Monday  | Tuesday | Wednesday | Thursday | Friday |
+| ------ |:-----:| :------:| :------:| :--------:| :-------:| :-----:| 
+|        |       |         |         |           |          |        |
