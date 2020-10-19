@@ -193,7 +193,7 @@ def parse_text_for_all_weekdays(text_list: List[str]) -> dict:
     def line_reduction(x: tuple, y: str):
         upper_y = y.upper()
         if any(z in upper_y for z in WEEK_DAYS):
-            tracking_day = re.match(r'(MON|TUES|WEDNES|THURS|FRI)DAY', upper_y).group()
+            tracking_day = re.search(r'(MON|TUES|WEDNES|THURS|FRI)DAY', upper_y).group()
             update = {tracking_day: f"*{tracking_day}*\n"}
         else:
             tracking_day = x[0] or "MONDAY"
