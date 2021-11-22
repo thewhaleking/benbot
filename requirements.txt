@@ -1,4 +1,6 @@
-slackclient~=2.1.0
+slack-sdk
 pygsheets~=2.0.0
 python-dateutil~=2.8.0
-PyYAML~=5.1
+PyYAML==6.0
+requests
+Quart==0.15.1

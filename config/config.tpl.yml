@@ -1,6 +1,8 @@
 tokens:
   slack_token: your bot's Slack API token
 
+cafe_name: cafe-name
+
 whitelist_channels:
   - Channel
   - IDs
@@ -33,5 +35,3 @@ bot_user:
   id: bot ID
   name: bot's name
   tag_formatted_id: <@bot ID>
-
-sheet_key: Google Sheets Key
