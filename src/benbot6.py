@@ -1,10 +1,11 @@
 from functools import partial, reduce
+import json
 import logging
 from pprint import PrettyPrinter
 import sys
 from typing import Callable
 
-from quart import Quart, request
+from quart import Quart, request, jsonify
 
 from src import CONFIG
 
@@ -17,11 +18,10 @@ app = Quart(__name__)
 
 
 @app.route("/mention", methods=["POST"])
-def mentioned():
-    print(request.json)
-    text = request.json['data']['text']
-    result = route(text)
-    logging.info(result)
+async def mentioned():
+    data = json.loads(await request.data)
+    print("mention", data)
+    return "ok"
 
 
 def route(text: str) -> Callable:
