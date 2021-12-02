@@ -23,6 +23,9 @@ class Cafe:
         )
 
     def get_menu_items(self, date_: str) -> dict:
+        """
+        :param date_: str YYYY-MM-DD
+        """
         r = requests.get(f"{self.base_url}/{date_}")
         lines = r.text.splitlines()
         for line in lines:
@@ -31,4 +34,8 @@ class Cafe:
         raise Exception("Unable to find ")
 
     def menu_items(self, date_) -> str:
+        """
+        Get menu items as string for specified date.
+        :param date_: str YYYY-MM-DD
+        """
         return self.items_to_text(self.get_menu_items(date_))

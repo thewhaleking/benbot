@@ -1,56 +1,83 @@
-from functools import partial, reduce
+from datetime import datetime, timedelta
+from functools import reduce
 import json
 import logging
 from pprint import PrettyPrinter
+from random import choice
 import sys
-from typing import Callable
 
-from quart import Quart, request, jsonify
+from slack_sdk import WebClient
+from quart import Quart, request
 
 from src import CONFIG
+from src.get_menu import Cafe
 
-BASE_URI = f"https://auroraphq.cafebonappetit.com/cafe/{CONFIG['cafe_name']}"
+WEEK_DAYS = ('MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY')
 
 logging.basicConfig(stream=sys.stdout, format='%(name)s - %(levelname)s - %(message)s')
 pp = PrettyPrinter(indent=4)
 
 app = Quart(__name__)
+web_client = WebClient(CONFIG["tokens"]["slack_token"])
+cafe = Cafe(CONFIG["cafe_name"])
 
 
 @app.route("/mention", methods=["POST"])
 async def mentioned():
     data = json.loads(await request.data)
-    print("mention", data)
+    event = data["event"]
+    channel = event["channel"]
+    if "lunch" in event["text"]:
+        post_meal("lunch", channel, event["text"])
     return "ok"
 
 
-def route(text: str) -> Callable:
-    """
-    Attempts to match a routable phrase with one used in the message received.
-    :param text: The message text
-    :return: A function for the routing if a match is found, else None
-    """
-    routing_dict = {
-        'add-lunch': partial(add_meal, meal_type='lunch'),
-        'add-dinner': partial(add_meal, meal_type='dinner'),
-        'lunch': partial(post_meal, meal_type='lunch'),
-        'dinner': partial(post_meal, meal_type='dinner'),
+def parse_message_for_day(text: str) -> datetime:
+    today = datetime.now().date()
+    non_weekday_mappings = {
+        'TODAY': today,
+        'TOMORROW': today + timedelta(days=1),
+        # 'WEEK': 'WEEK'
     }
-    dict_match = reduce(lambda x, y: y if y in routing_dict else x, reversed(text.split(" ")), "")
-    if dict_match:
-        return routing_dict[dict_match]
+    # days = {**non_weekday_mappings, **{x: x for x in WEEK_DAYS}}
+    days = non_weekday_mappings
+    upper_text = text.upper()
+    day = reduce(lambda x, y: y if y in upper_text else x, days.keys(), '')
+    if day:
+        when = days[day]
+    elif len(upper_text.split()) < 3:
+        when = days['TODAY']
+    else:
+        when = None
+    return when
 
 
-def main():
-    pass
-    # try:
-    #     start_slack()
-    # except KeyboardInterrupt:
-    #     sys.exit()
-    # except Exception as e:
-    #     logging.warning(f'exception!!! {e}')
-    #     sleep(10)
-    #     main()
+def post_meal(meal_type: str, channel: str, text: str) -> None:
+    # date_dict = {**{"WEEK": '*'}, **{x: x.lower() for x in WEEK_DAYS}}
+    # when = parse_message_for_day(text)
+    # year, week, _ = datetime.now().isocalendar()
+    # cursor.execute(f'SELECT {date_dict[when]} FROM {meal_type} WHERE (week = ? AND year = ?)', (week, year))
+    # data = cursor.fetchone()
+    when = parse_message_for_day(text)
+    if not when:
+        data = None
+    else:
+        data = cafe.menu_items(when.strftime("%Y-%m-%d"))
+    if not data:
+        output = ("Might be a hit or might be a miss, but I've got no idea what's for "
+                  f"{meal_type}{text.lower().split(meal_type)[1] or ''}")
+        icon_url = 'https://66.media.tumblr.com/601c897fb5e3dd47f5c6677d64203b2b/tumblr_ph4tw8HK1f1qiz4ulo1_400.png'
+        username = 'NyanNyanBot'
+    else:
+        icon_url = choice(CONFIG['guy_fieri_images'])
+        username = 'Flavorbot'
+        output = f"{meal_type} for {when}:\n{data}"
+    web_client.chat_postMessage(
+        channel=channel,
+        text=output,
+        icon_url=icon_url,
+        username=username
+    )
 
 
 if __name__ == '__main__':
