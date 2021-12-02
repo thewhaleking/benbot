@@ -12,6 +12,7 @@ class Cafe:
             "1": "[V]",
             "3": "[SW]",
             "4": "[Ve]",
+            "6": "[FF]",
             "9": "[GF]"
         }
         return "".join(cor_icons.get(i, "") for i in item["cor_icon"])
