@@ -34,19 +34,29 @@ async def mentioned():
 
 def parse_message_for_day(text: str) -> datetime:
     today = datetime.now().date()
+    week_dict = {
+        "MONDAY": 1,
+        "TUESDAY": 2,
+        "WEDNESDAY": 3,
+        "THURSDAY": 4,
+        "FRIDAY": 5
+    }
     non_weekday_mappings = {
         'TODAY': today,
         'TOMORROW': today + timedelta(days=1),
         # 'WEEK': 'WEEK'
     }
     # days = {**non_weekday_mappings, **{x: x for x in WEEK_DAYS}}
-    days = non_weekday_mappings
+    days = {**non_weekday_mappings, **week_dict}
     upper_text = text.upper()
     day = reduce(lambda x, y: y if y in upper_text else x, days.keys(), '')
     if day:
-        when = days[day]
+        if day in non_weekday_mappings:
+            when = non_weekday_mappings[day]
+        else:
+            when = today - timedelta(days=today.weekday()) + timedelta(days=week_dict[day])
     elif len(upper_text.split()) < 3:
-        when = days['TODAY']
+        when = non_weekday_mappings['TODAY']
     else:
         when = None
     return when
