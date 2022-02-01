@@ -9,8 +9,8 @@ cache = TTLCache(maxsize=10, ttl=timedelta(days=7).total_seconds())
 
 
 class Cafe:
-    def __init__(self, cafe_name: str):
-        self.base_url = f"https://auroraphq.cafebonappetit.com/cafe/{cafe_name}"
+    def __init__(self, company: str, cafe_name: str):
+        self.base_url = f"https://{company}.cafebonappetit.com/cafe/{cafe_name}"
 
     @staticmethod
     def convert_cor_icons(item: dict):
