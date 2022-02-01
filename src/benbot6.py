@@ -85,19 +85,17 @@ def post_meal(meal_type: str, channel: str, text: str) -> None:
     else:
         data = cafe.menu_items(when.strftime("%Y-%m-%d"))
     if not data:
-        output = ("Might be a hit or might be a miss, but I've got no idea what's for "
-                  f"{meal_type}{text.lower().split(meal_type)[1] or ''}")
-        icon_url = 'https://66.media.tumblr.com/601c897fb5e3dd47f5c6677d64203b2b/tumblr_ph4tw8HK1f1qiz4ulo1_400.png'
-        username = 'NyanNyanBot'
+        output = (
+            f"I'm sure it'll be {choice(CONFIG['guy_fieri_phrases'])}, but I've got no idea what's for "
+            f"{meal_type}{text.lower().split(meal_type)[1] or ''}"
+        )
     else:
-        icon_url = choice(CONFIG['guy_fieri_images'])
-        username = 'Flavorbot'
         output = f"{meal_type} for {when}:\n{data}"
     web_client.chat_postMessage(
         channel=channel,
         text=output,
-        icon_url=icon_url,
-        username=username
+        icon_url=choice(CONFIG['guy_fieri_images']),
+        username='Flavorbot'
     )
 
 
