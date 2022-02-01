@@ -19,7 +19,8 @@ pp = PrettyPrinter(indent=4)
 
 app = Quart(__name__)
 web_client = WebClient(CONFIG["tokens"]["slack_token"])
-cafe = Cafe(CONFIG["cafe_name"])
+cafe = Cafe(CONFIG["spa"]["cafe_name"])
+hq_cafe = Cafe(CONFIG["hq"]["cafe_name"])
 
 
 @app.route("/mention", methods=["POST"])
@@ -68,11 +69,12 @@ def post_meal(meal_type: str, channel: str, text: str) -> None:
     # year, week, _ = datetime.now().isocalendar()
     # cursor.execute(f'SELECT {date_dict[when]} FROM {meal_type} WHERE (week = ? AND year = ?)', (week, year))
     # data = cursor.fetchone()
+    cafe_ = hq_cafe if "hq" in text else cafe
     when = parse_message_for_day(text)
     if not when:
         data = None
     else:
-        data = cafe.menu_items(when.strftime("%Y-%m-%d"))
+        data = cafe_.menu_items(when.strftime("%Y-%m-%d"))
     if not data:
         output = ("Might be a hit or might be a miss, but I've got no idea what's for "
                   f"{meal_type}{text.lower().split(meal_type)[1] or ''}")
