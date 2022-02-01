@@ -1,7 +1,10 @@
 tokens:
   slack_token: your bot's Slack API token
 
-cafe_name: cafe-name
+cafes:
+  default: cafe-name
+  # additional cafes (optional)
+  # nickname: cafe-name
 
 whitelist_channels:
   - Channel

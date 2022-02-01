@@ -19,8 +19,9 @@ pp = PrettyPrinter(indent=4)
 
 app = Quart(__name__)
 web_client = WebClient(CONFIG["tokens"]["slack_token"])
-cafe = Cafe(CONFIG["spa"]["cafe_name"])
-hq_cafe = Cafe(CONFIG["hq"]["cafe_name"])
+cafes = {
+    x: Cafe(y) for (x, y) in CONFIG["cafes"]
+}
 
 
 @app.route("/mention", methods=["POST"])
@@ -63,18 +64,26 @@ def parse_message_for_day(text: str) -> datetime:
     return when
 
 
+def get_cafe(text) -> Cafe:
+    for (cafe_name, cafe_) in cafes.items():
+        if cafe_name in text:
+            return cafe_
+    else:
+        return cafes["default"]
+
+
 def post_meal(meal_type: str, channel: str, text: str) -> None:
     # date_dict = {**{"WEEK": '*'}, **{x: x.lower() for x in WEEK_DAYS}}
     # when = parse_message_for_day(text)
     # year, week, _ = datetime.now().isocalendar()
     # cursor.execute(f'SELECT {date_dict[when]} FROM {meal_type} WHERE (week = ? AND year = ?)', (week, year))
     # data = cursor.fetchone()
-    cafe_ = hq_cafe if "hq" in text else cafe
+    cafe = get_cafe(text)
     when = parse_message_for_day(text)
     if not when:
         data = None
     else:
-        data = cafe_.menu_items(when.strftime("%Y-%m-%d"))
+        data = cafe.menu_items(when.strftime("%Y-%m-%d"))
     if not data:
         output = ("Might be a hit or might be a miss, but I've got no idea what's for "
                   f"{meal_type}{text.lower().split(meal_type)[1] or ''}")
