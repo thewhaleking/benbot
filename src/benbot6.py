@@ -35,6 +35,11 @@ async def mentioned():
 
 
 def parse_message_for_day(text: str) -> datetime:
+    """
+    Attempts to determine the date for the meal requested, based on the Slack message. If no date can be determined,
+    today's date is returned.
+    :param text: the Slack message to parse
+    """
     today = datetime.now().date()
     week_dict = {
         "MONDAY": 0,
@@ -48,7 +53,6 @@ def parse_message_for_day(text: str) -> datetime:
         'TOMORROW': today + timedelta(days=1),
         # 'WEEK': 'WEEK'
     }
-    # days = {**non_weekday_mappings, **{x: x for x in WEEK_DAYS}}
     days = {**non_weekday_mappings, **week_dict}
     upper_text = text.upper()
     day = reduce(lambda x, y: y if y in upper_text else x, days.keys(), '')
@@ -65,6 +69,11 @@ def parse_message_for_day(text: str) -> datetime:
 
 
 def get_cafe(text) -> Cafe:
+    """
+    Determines the café to post from, based on the message. Returns the default café if the message doesn't contain
+    a café nickname (as specified in the config.yml file)
+    :param text: the message posted to Slack requesting the message
+    """
     for (cafe_name, cafe_) in cafes.items():
         if cafe_name in text:
             return cafe_
@@ -73,11 +82,12 @@ def get_cafe(text) -> Cafe:
 
 
 def post_meal(meal_type: str, channel: str, text: str) -> None:
-    # date_dict = {**{"WEEK": '*'}, **{x: x.lower() for x in WEEK_DAYS}}
-    # when = parse_message_for_day(text)
-    # year, week, _ = datetime.now().isocalendar()
-    # cursor.execute(f'SELECT {date_dict[when]} FROM {meal_type} WHERE (week = ? AND year = ?)', (week, year))
-    # data = cursor.fetchone()
+    """
+    Determines the meal text, and posts it to the Slack channel the original message was posted in.
+    :param meal_type: 'lunch' or 'dinner'
+    :param channel: the Slack channel ID that the message was posted in
+    :param text: the text of the original message
+    """
     cafe = get_cafe(text)
     when = parse_message_for_day(text)
     if not when:
