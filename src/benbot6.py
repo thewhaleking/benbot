@@ -51,7 +51,7 @@ def parse_message_for_day(text: str) -> datetime:
     non_weekday_mappings = {
         'TODAY': today,
         'TOMORROW': today + timedelta(days=1),
-        # 'WEEK': 'WEEK'
+        'YESTERDAY': today - timedelta(days=1)
     }
     days = {**non_weekday_mappings, **week_dict}
     upper_text = text.upper()
