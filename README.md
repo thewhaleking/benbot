@@ -1,21 +1,12 @@
 # benbot
-Slack bot that reads lunch/dinner menus, stores them, and regurgitates this info on command.
+Slack bot that gets Cafe Bon Appetit lunch menus and regurgitates this info on command.
 
 ## How do I use this?
 1. Clone the repo
-1. Create a [Slack bot](https://slack.com/apps/A0F7YS25R-bots), and get its API token
-1. Create a Google Sheet with the structure below
-1. Create a [Google Service Account](https://console.cloud.google.com/apis/credentials),
-   download the JSON, rename as 'service_account.json' and move to the `config/` directory
-1. Share your sheet with your bot user's email address (in the `service_account.json` under "client_email")
-1. Copy the `config/config.yml.tpl` to `config/config.yml` and fill it out with your values
-1. Create and run the Docker container using the `Dockerfile` 
-
-
-#### Google Sheets Structure
-Two identital worksheets (tabs) in a single Spreadsheet, named `lunch` and `dinner`, each with 
-the following structure (just a header row):
-
-| Year   | Week  | Monday  | Tuesday | Wednesday | Thursday | Friday |
-| ------ |:-----:| :------:| :------:| :--------:| :-------:| :-----:| 
-|        |       |         |         |           |          |        |
+2. Create a [Slack app](https://api.slack.com/apps)
+3. Add a bot token to your Slack app.
+4. Copy the `config/config.tpl.yml` to `config/config.yml` and fill it out with your values
+5. Find your cafe-name(s) from the Cafe Bon Appetit URL (`https://{company}.cafebonappetit.com/cafe/{cafe}/`)
+6. Get the app running in your server (implementation totally up to you, I use NGINX to run `hypercorn --bind unix:benbot.sock -m 007 src/benbot6:app`)
+7. Set your Slack app up for Event Subscriptions (really only need app_mention with the app_mentions:read scope)
+8. Have fun.

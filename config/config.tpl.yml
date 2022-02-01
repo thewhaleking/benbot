@@ -1,4 +1,5 @@
 tokens:
+  # this is a Bot token starting with xoxb-
   slack_token: your bot's Slack API token
 
 cafes:
@@ -31,8 +32,3 @@ guy_fieri_phrases:
   - the real deal
   - bananas, and bananas is good
   - winner winner flavorful dinner
-
-bot_user:
-  id: bot ID
-  name: bot's name
-  tag_formatted_id: <@bot ID>
