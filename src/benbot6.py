@@ -65,8 +65,9 @@ def get_cafe(text) -> Cafe:
     a café nickname (as specified in the config.yml file)
     :param text: the message posted to Slack requesting the message
     """
+    u_text = text.upper()
     for (cafe_name, cafe_) in cafes.items():
-        if cafe_name in text:
+        if cafe_name.upper() in u_text:
             return cafe_
     else:
         return cafes["default"]
