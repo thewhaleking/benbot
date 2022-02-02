@@ -1,8 +1,6 @@
-from datetime import datetime, timedelta
-from functools import reduce
+from datetime import datetime, timedelta, date
 import json
 import logging
-from pprint import PrettyPrinter
 from random import choice
 import sys
 from typing import Optional
@@ -17,7 +15,6 @@ WEEK_DAYS = ('MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY')
 MEAL_TYPES = ("LUNCH", "DINNER")
 
 logging.basicConfig(stream=sys.stdout, format='%(name)s - %(levelname)s - %(message)s')
-pp = PrettyPrinter(indent=4)
 
 app = Quart(__name__)
 web_client = WebClient(CONFIG["tokens"]["slack_token"])
