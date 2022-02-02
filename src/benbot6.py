@@ -5,6 +5,7 @@ import logging
 from pprint import PrettyPrinter
 from random import choice
 import sys
+from typing import Optional
 
 from slack_sdk import WebClient
 from quart import Quart, request
@@ -13,6 +14,7 @@ from src import CONFIG
 from src.get_menu import Cafe
 
 WEEK_DAYS = ('MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY')
+MEAL_TYPES = ("LUNCH", "DINNER")
 
 logging.basicConfig(stream=sys.stdout, format='%(name)s - %(levelname)s - %(message)s')
 pp = PrettyPrinter(indent=4)
@@ -29,43 +31,35 @@ async def mentioned():
     data = json.loads(await request.data)
     event = data["event"]
     channel = event["channel"]
-    if "lunch" in event["text"]:
+    if "lunch" in str(event["text"]).lower():
         post_meal("lunch", channel, event["text"])
     return "ok"
 
 
-def parse_message_for_day(text: str) -> datetime:
+def parse_message_for_day(text: str) -> Optional[date]:
     """
     Attempts to determine the date for the meal requested, based on the Slack message. If no date can be determined,
     today's date is returned.
     :param text: the Slack message to parse
     """
     today = datetime.now().date()
-    week_dict = {
-        "MONDAY": 0,
-        "TUESDAY": 1,
-        "WEDNESDAY": 2,
-        "THURSDAY": 3,
-        "FRIDAY": 4
-    }
-    non_weekday_mappings = {
+    week_start = today - timedelta(today.weekday())
+    day_mappings = {
         'TODAY': today,
         'TOMORROW': today + timedelta(days=1),
-        'YESTERDAY': today - timedelta(days=1)
+        'YESTERDAY': today - timedelta(days=1),
+        'MONDAY': week_start,
+        'TUESDAY': week_start + timedelta(days=1),
+        'WEDNESDAY': week_start + timedelta(days=2),
+        'THURSDAY': week_start + timedelta(days=3),
+        'FRIDAY': week_start + timedelta(days=4)
     }
-    days = {**non_weekday_mappings, **week_dict}
     upper_text = text.upper()
-    day = reduce(lambda x, y: y if y in upper_text else x, days.keys(), '')
-    if day:
-        if day in non_weekday_mappings:
-            when = non_weekday_mappings[day]
-        else:
-            when = today - timedelta(days=today.weekday()) + timedelta(days=week_dict[day])
-    elif len(upper_text.split()) < 3:
-        when = non_weekday_mappings['TODAY']
-    else:
-        when = None
-    return when
+    if any(upper_text.split()[-1] == x for x in MEAL_TYPES):
+        return today
+    for day, date_ in day_mappings.items():
+        if day in upper_text:
+            return date_
 
 
 def get_cafe(text) -> Cafe:
@@ -91,15 +85,12 @@ def post_meal(meal_type: str, channel: str, text: str) -> None:
     cafe = get_cafe(text)
     when = parse_message_for_day(text)
     if not when:
-        data = None
-    else:
-        data = cafe.menu_items(when.strftime("%Y-%m-%d"))
-    if not data:
         output = (
             f"I'm sure it'll be {choice(CONFIG['guy_fieri_phrases'])}, but I've got no idea what's for "
             f"{meal_type}{text.lower().split(meal_type)[1] or ''}"
         )
     else:
+        data = cafe.menu_items(when.strftime("%Y-%m-%d"))
         output = f"{meal_type} for {when}:\n{data}"
     web_client.chat_postMessage(
         channel=channel,
