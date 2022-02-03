@@ -89,7 +89,7 @@ def post_meal(meal_type: str, channel: str, text: str) -> None:
         )
     else:
         data = cafe.menu_items(when.strftime("%Y-%m-%d"))
-        output = f"{meal_type} for {when}:\n{data}"
+        output = f"{meal_type} for {cafe.cafe_name} on {when}:\n{data}"
     web_client.chat_postMessage(
         channel=channel,
         text=output,

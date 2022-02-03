@@ -2,15 +2,11 @@ from datetime import timedelta
 import json
 import requests
 
-from cachetools import cached, TTLCache
-
-
-cache = TTLCache(maxsize=10, ttl=timedelta(days=7).total_seconds())
-
 
 class Cafe:
     def __init__(self, company: str, cafe_name: str):
         self.base_url = f"https://{company}.cafebonappetit.com/cafe/{cafe_name}"
+        self.cafe_name = cafe_name
 
     @staticmethod
     def convert_cor_icons(item: dict):
@@ -41,7 +37,6 @@ class Cafe:
                 return json.loads(line.split("= ")[1][:-1])
         raise Exception("Unable to find ")
 
-    @cached(cache)
     def menu_items(self, date_) -> str:
         """
         Get menu items as string for specified date.
