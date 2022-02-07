@@ -6,10 +6,12 @@ cafes:
   default:
     company: company
     name: cafe
-  # additional cafes, you can add as many as you'd like
+    utc_offset: 0  # the UTC offset in int for the local time of the café
+  # additional cafés, you can add as many as you'd like
   # cafe2:
   #   company: same-company
   #   name: another-cafe
+  #   utc_offset: -5
 
 whitelist_channels:
   - Channel

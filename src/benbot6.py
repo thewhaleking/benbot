@@ -1,9 +1,9 @@
-from datetime import datetime, timedelta, date
+from datetime import datetime, timedelta, date, timezone
 import json
 import logging
 from random import choice
 import sys
-from typing import Optional
+from typing import Optional, Tuple
 
 from slack_sdk import WebClient
 from quart import Quart, request
@@ -33,13 +33,14 @@ async def mentioned():
     return "ok"
 
 
-def parse_message_for_day(text: str) -> Optional[date]:
+def parse_message_for_day(text: str, utc_offset: int = 0) -> Optional[date]:
     """
     Attempts to determine the date for the meal requested, based on the Slack message. If no date can be determined,
     today's date is returned.
     :param text: the Slack message to parse
+    :param utc_offset: UTC offset for the time zone of the café in question
     """
-    today = datetime.now().date()
+    today = (datetime.now(timezone.utc) + timedelta(hours=utc_offset)).date()
     week_start = today - timedelta(today.weekday())
     day_mappings = {
         'TODAY': today,
@@ -59,7 +60,7 @@ def parse_message_for_day(text: str) -> Optional[date]:
             return date_
 
 
-def get_cafe(text) -> Cafe:
+def get_cafe(text) -> Tuple[Cafe, int]:
     """
     Determines the café to post from, based on the message. Returns the default café if the message doesn't contain
     a café nickname (as specified in the config.yml file)
@@ -68,9 +69,9 @@ def get_cafe(text) -> Cafe:
     u_text = text.upper()
     for (cafe_name, cafe_) in cafes.items():
         if cafe_name.upper() in u_text:
-            return cafe_
+            return cafe_, CONFIG["cafes"][cafe_name]["utc_offset"]
     else:
-        return cafes["default"]
+        return cafes["default"], CONFIG["cafes"]["default"]["utc_offset"]
 
 
 def post_meal(meal_type: str, channel: str, text: str) -> None:
@@ -80,8 +81,8 @@ def post_meal(meal_type: str, channel: str, text: str) -> None:
     :param channel: the Slack channel ID that the message was posted in
     :param text: the text of the original message
     """
-    cafe = get_cafe(text)
-    when = parse_message_for_day(text)
+    cafe, utc_offset = get_cafe(text)
+    when = parse_message_for_day(text, utc_offset)
     if not when:
         output = (
             f"I'm sure it'll be {choice(CONFIG['guy_fieri_phrases'])}, but I've got no idea what's for "
