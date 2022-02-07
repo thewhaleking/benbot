@@ -19,7 +19,7 @@ logging.basicConfig(stream=sys.stdout, format='%(name)s - %(levelname)s - %(mess
 app = Quart(__name__)
 web_client = WebClient(CONFIG["tokens"]["slack_token"])
 cafes = {
-    x: Cafe(*y.values()) for (x, y) in CONFIG["cafes"].items()
+    x: Cafe(y["company"], y["name"]) for (x, y) in CONFIG["cafes"].items()
 }
 
 
