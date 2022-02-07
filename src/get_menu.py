@@ -20,8 +20,8 @@ class Cafe:
 
     def items_to_text(self, items: dict) -> str:
         return "\n".join(
-            "* "
-            f"{val['label'].title()}{self.convert_cor_icons(val)}: "
+            "  • "
+            f"*{val['label'].title()}* {self.convert_cor_icons(val)}: "
             f"{val['description'].capitalize()}." for val in items.values()
         )
 
