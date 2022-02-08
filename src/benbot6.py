@@ -81,22 +81,29 @@ def post_meal(meal_type: str, channel: str, text: str) -> None:
     :param channel: the Slack channel ID that the message was posted in
     :param text: the text of the original message
     """
+    def post_message(post_text: str, timestamp=None):
+        return web_client.chat_postMessage(
+            channel=channel,
+            text=output,
+            icon_url=choice(CONFIG['guy_fieri_images']),
+            username='Flavorbot',
+            thread_ts=timestamp
+        )
+
     cafe, utc_offset = get_cafe(text)
     when = parse_message_for_day(text, utc_offset)
     if not when:
-        output = (
+        post_message(
             f"I'm sure it'll be {choice(CONFIG['guy_fieri_phrases'])}, but I've got no idea what's for "
             f"{meal_type}{text.lower().split(meal_type)[1] or ''}"
         )
     else:
         data = cafe.menu_items(when.strftime("%Y-%m-%d"))
-        output = f"{meal_type} for {cafe.cafe_name} on {when}:\n{data}"
-    web_client.chat_postMessage(
-        channel=channel,
-        text=output,
-        icon_url=choice(CONFIG['guy_fieri_images']),
-        username='Flavorbot'
-    )
+        if len(data.splitlines()) > 9:
+            ts = post_message(f"{meal_type} for {cafe.cafe_name} on {when}")["ts"]
+            post_message(data, timestamp=ts)
+        else:
+            post_message(f"{meal_type} for {cafe.cafe_name} on {when}:\n{data}")
 
 
 if __name__ == '__main__':
