@@ -29,8 +29,18 @@ async def mentioned():
     event = data["event"]
     channel = event["channel"]
     if "lunch" in str(event["text"]).lower():
-        post_meal("lunch", channel, event["text"])
+        await post_meal("lunch", channel, event["text"])
     return "ok"
+
+
+@app.before_serving
+async def preload():
+    """
+    Executed at app startup
+    """
+    # asyncio.create_task(catia.get_part_number("prd"))
+    for cafe in cafes:
+        await cafe.initialize_session()
 
 
 def parse_message_for_day(text: str, utc_offset: int = 0) -> Optional[List[date]]:
@@ -81,7 +91,7 @@ def get_cafe(text) -> Tuple[Cafe, int]:
         return cafes["default"], CONFIG["cafes"]["default"]["utc_offset"]
 
 
-def post_meal(meal_type: str, channel: str, text: str) -> None:
+async def post_meal(meal_type: str, channel: str, text: str) -> None:
     """
     Determines the meal text, and posts it to the Slack channel the original message was posted in.
     :param meal_type: 'lunch' or 'dinner'
@@ -106,7 +116,7 @@ def post_meal(meal_type: str, channel: str, text: str) -> None:
         )
     else:
         for date_ in when:
-            data = cafe.menu_items(date_.strftime("%Y-%m-%d"))
+            data = await cafe.menu_items(date_.strftime("%Y-%m-%d"))
             ts = post_message(f"{meal_type} for {cafe.cafe_name} on {date_.strftime('%m/%d/%Y')}")["ts"]
             post_message(data, timestamp=ts)
 

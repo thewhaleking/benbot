@@ -1,3 +1,4 @@
+aiohttp
 cachetools==5.0.0
 slack-sdk==3.13.0
 PyYAML==6.0
