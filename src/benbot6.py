@@ -133,7 +133,7 @@ async def post_meal(meal_type: str, channel: str, text: str) -> None:
             f"{meal_type}{text.lower().split(meal_type)[1] or ''}"
         )
     else:
-        data = asyncio.gather(get_data(date_) for date_ in when)
+        data = await asyncio.gather(*[get_data(date_) for date_ in when])
         for (meal, cafe_name, meal_date, output) in data:
             ts = post_message(f"{meal} for {cafe_name} on {meal_date}")["ts"]
             post_message(output, timestamp=ts)
