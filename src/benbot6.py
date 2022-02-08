@@ -44,6 +44,15 @@ async def preload():
         await cafe.initialize_session()
 
 
+@app.after_serving
+async def shutdown():
+    """
+    Executed at app shutdown
+    """
+    for cafe in cafes:
+        await cafe.req.close()
+
+
 def parse_message_for_day(text: str, utc_offset: int = 0) -> Optional[List[date]]:
     """
     Attempts to determine the date for the meal requested, based on the Slack message. If no date can be determined,

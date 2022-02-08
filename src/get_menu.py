@@ -1,6 +1,5 @@
 import json
 import aiohttp
-import logging
 
 
 class Cafe:
@@ -24,12 +23,11 @@ class Cafe:
         return "".join(cor_icons.get(i, "") for i in item["cor_icon"])
 
     async def items_to_text(self, items: dict) -> str:
-        logging.error(val for val in items.values())
-        return "\n".join(
+        return "\n".join([
             "  • "
             f"*{val['label'].title()}* {await self.convert_cor_icons(val)}: "
             f"{val['description'].capitalize()}." for val in items.values()
-        )
+        ])
 
     async def get_menu_items(self, date_: str) -> dict:
         """
