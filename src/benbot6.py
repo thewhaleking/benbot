@@ -1,3 +1,4 @@
+import asyncio
 from datetime import datetime, timedelta, date, timezone
 import json
 import logging
@@ -107,6 +108,11 @@ async def post_meal(meal_type: str, channel: str, text: str) -> None:
             thread_ts=timestamp
         )
 
+    async def get_data_and_post(date_: date)
+        data = await cafe.menu_items(date_.strftime("%Y-%m-%d"))
+        ts = post_message(f"{meal_type} for {cafe.cafe_name} on {date_.strftime('%m/%d/%Y')}")["ts"]
+        post_message(data, timestamp=ts)
+
     cafe, utc_offset = get_cafe(text)
     when = parse_message_for_day(text, utc_offset)
     if not when:
@@ -115,10 +121,8 @@ async def post_meal(meal_type: str, channel: str, text: str) -> None:
             f"{meal_type}{text.lower().split(meal_type)[1] or ''}"
         )
     else:
-        for date_ in when:
-            data = await cafe.menu_items(date_.strftime("%Y-%m-%d"))
-            ts = post_message(f"{meal_type} for {cafe.cafe_name} on {date_.strftime('%m/%d/%Y')}")["ts"]
-            post_message(data, timestamp=ts)
+        for d in when:
+            asyncio.create_task(get_data_and_post(d))
 
 
 if __name__ == '__main__':
