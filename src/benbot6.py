@@ -105,12 +105,10 @@ def post_meal(meal_type: str, channel: str, text: str) -> None:
             f"{meal_type}{text.lower().split(meal_type)[1] or ''}"
         )
     else:
-        data = "".join(cafe.menu_items(x.strftime("%Y-%m-%d")) for x in when)
-        if len(data.splitlines()) > 9:
-            ts = post_message(f"{meal_type} for {cafe.cafe_name} on {when}")["ts"]
+        for date_ in when:
+            data = cafe.menu_items(date_.strftime("%Y-%m-%d"))
+            ts = post_message(f"{meal_type} for {cafe.cafe_name} on {date_.strftime('%m/%d/%Y')}")["ts"]
             post_message(data, timestamp=ts)
-        else:
-            post_message(f"{meal_type} for {cafe.cafe_name} on {when}:\n{data}")
 
 
 if __name__ == '__main__':
