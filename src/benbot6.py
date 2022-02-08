@@ -3,7 +3,7 @@ import json
 import logging
 from random import choice
 import sys
-from typing import Optional, Tuple
+from typing import Optional, Tuple, List
 
 from slack_sdk import WebClient
 from quart import Quart, request
@@ -33,7 +33,7 @@ async def mentioned():
     return "ok"
 
 
-def parse_message_for_day(text: str, utc_offset: int = 0) -> Optional[date]:
+def parse_message_for_day(text: str, utc_offset: int = 0) -> Optional[List[date]]:
     """
     Attempts to determine the date for the meal requested, based on the Slack message. If no date can be determined,
     today's date is returned.
@@ -43,18 +43,25 @@ def parse_message_for_day(text: str, utc_offset: int = 0) -> Optional[date]:
     today = (datetime.now(timezone.utc) + timedelta(hours=utc_offset)).date()
     week_start = today - timedelta(today.weekday())
     day_mappings = {
-        'TODAY': today,
-        'TOMORROW': today + timedelta(days=1),
-        'YESTERDAY': today - timedelta(days=1),
-        'MONDAY': week_start,
-        'TUESDAY': week_start + timedelta(days=1),
-        'WEDNESDAY': week_start + timedelta(days=2),
-        'THURSDAY': week_start + timedelta(days=3),
-        'FRIDAY': week_start + timedelta(days=4)
+        'TODAY': [today],
+        'TOMORROW': [today + timedelta(days=1)],
+        'YESTERDAY': [today - timedelta(days=1)],
+        'MONDAY': [week_start],
+        'TUESDAY': [week_start + timedelta(days=1)],
+        'WEDNESDAY': [week_start + timedelta(days=2)],
+        'THURSDAY': [week_start + timedelta(days=3)],
+        'FRIDAY': [week_start + timedelta(days=4)],
+        'WEEK': [
+            week_start,
+            week_start+timedelta(days=1),
+            week_start + timedelta(days=2),
+            week_start + timedelta(days=3),
+            week_start + timedelta(days=4),
+        ]
     }
     upper_text = text.upper()
     if any(upper_text.split()[-1] == x for x in MEAL_TYPES):
-        return today
+        return [today]
     for day, date_ in day_mappings.items():
         if day in upper_text:
             return date_
@@ -98,7 +105,7 @@ def post_meal(meal_type: str, channel: str, text: str) -> None:
             f"{meal_type}{text.lower().split(meal_type)[1] or ''}"
         )
     else:
-        data = cafe.menu_items(when.strftime("%Y-%m-%d"))
+        data = "".join(cafe.menu_items(x.strftime("%Y-%m-%d")) for x in when)
         if len(data.splitlines()) > 9:
             ts = post_message(f"{meal_type} for {cafe.cafe_name} on {when}")["ts"]
             post_message(data, timestamp=ts)
