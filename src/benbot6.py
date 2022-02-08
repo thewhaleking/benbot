@@ -40,7 +40,7 @@ async def preload():
     Executed at app startup
     """
     # asyncio.create_task(catia.get_part_number("prd"))
-    for cafe in cafes:
+    for cafe in cafes.values():
         await cafe.initialize_session()
 
 
@@ -108,7 +108,7 @@ async def post_meal(meal_type: str, channel: str, text: str) -> None:
             thread_ts=timestamp
         )
 
-    async def get_data_and_post(date_: date)
+    async def get_data_and_post(date_: date):
         data = await cafe.menu_items(date_.strftime("%Y-%m-%d"))
         ts = post_message(f"{meal_type} for {cafe.cafe_name} on {date_.strftime('%m/%d/%Y')}")["ts"]
         post_message(data, timestamp=ts)

@@ -1,5 +1,6 @@
 import json
 import aiohttp
+import logging
 
 
 class Cafe:
@@ -23,6 +24,7 @@ class Cafe:
         return "".join(cor_icons.get(i, "") for i in item["cor_icon"])
 
     async def items_to_text(self, items: dict) -> str:
+        logging.error(val for val in items.values())
         return "\n".join(
             "  • "
             f"*{val['label'].title()}* {await self.convert_cor_icons(val)}: "
@@ -33,12 +35,12 @@ class Cafe:
         """
         :param date_: str YYYY-MM-DD
         """
-        r = await self.req.get(f"{self.base_url}/{date_}")
-        lines = r.text.splitlines()
-        for line in lines:
-            if "Bamco.menu_items" in line:
-                return json.loads(line.split("= ")[1][:-1])
-        raise Exception("Unable to find ")
+        async with self.req.get(f"{self.base_url}/{date_}") as r:
+            lines = (await r.text()).splitlines()
+            for line in lines:
+                if "Bamco.menu_items" in line:
+                    return json.loads(line.split("= ")[1][:-1])
+            raise Exception("Unable to find ")
 
     async def menu_items(self, date_) -> str:
         """
