@@ -84,7 +84,7 @@ def post_meal(meal_type: str, channel: str, text: str) -> None:
     def post_message(post_text: str, timestamp=None):
         return web_client.chat_postMessage(
             channel=channel,
-            text=output,
+            text=post_text,
             icon_url=choice(CONFIG['guy_fieri_images']),
             username='Flavorbot',
             thread_ts=timestamp
