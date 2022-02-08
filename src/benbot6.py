@@ -117,10 +117,13 @@ async def post_meal(meal_type: str, channel: str, text: str) -> None:
             thread_ts=timestamp
         )
 
-    async def get_data_and_post(date_: date):
-        data = await cafe.menu_items(date_.strftime("%Y-%m-%d"))
-        ts = post_message(f"{meal_type} for {cafe.cafe_name} on {date_.strftime('%m/%d/%Y')}")["ts"]
-        post_message(data, timestamp=ts)
+    async def get_data(date_: date) -> Tuple[str, str, str, str]:
+        return (
+            meal_type,
+            cafe.cafe_name,
+            date_.strftime('%m/%d/%Y'),
+            await cafe.menu_items(date_.strftime("%Y-%m-%d"))
+        )
 
     cafe, utc_offset = get_cafe(text)
     when = parse_message_for_day(text, utc_offset)
@@ -130,8 +133,10 @@ async def post_meal(meal_type: str, channel: str, text: str) -> None:
             f"{meal_type}{text.lower().split(meal_type)[1] or ''}"
         )
     else:
-        for d in when:
-            asyncio.create_task(get_data_and_post(d))
+        data = asyncio.gather(get_data(date_) for date_ in when)
+        for (meal, cafe_name, meal_date, output) in data:
+            ts = post_message(f"{meal} for {cafe_name} on {meal_date}")["ts"]
+            post_message(output, timestamp=ts)
 
 
 if __name__ == '__main__':
