@@ -30,6 +30,8 @@ async def mentioned():
     event = data["event"]
     channel = event["channel"]
     if "lunch" in str(event["text"]).lower():
+        # Slack requires a response within 3000ms, so this is done asynchronously while a response is sent immediately
+        # to avoid multiple requests coming through for longer-running tasks (such as the full week's menu)
         asyncio.create_task(post_meal("lunch", channel, event["text"]))
     return "ok"
 
