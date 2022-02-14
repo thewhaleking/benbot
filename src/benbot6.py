@@ -30,7 +30,7 @@ async def mentioned():
     event = data["event"]
     channel = event["channel"]
     if "lunch" in str(event["text"]).lower():
-        await post_meal("lunch", channel, event["text"])
+        asyncio.create_task(post_meal("lunch", channel, event["text"]))
     return "ok"
 
 
