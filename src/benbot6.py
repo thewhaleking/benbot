@@ -29,10 +29,13 @@ async def mentioned():
     data = json.loads(await request.data)
     event = data["event"]
     channel = event["channel"]
-    if "lunch" in str(event["text"]).lower():
+    event_text = str(event["text"]).lower()
+    if "lunch" in event_text:
         # Slack requires a response within 3000ms, so this is done asynchronously while a response is sent immediately
         # to avoid multiple requests coming through for longer-running tasks (such as the full week's menu)
         asyncio.create_task(post_meal("lunch", channel, event["text"]))
+    elif "help" in event_text:
+        asyncio.create_task(help_text(channel))
     return "ok"
 
 
@@ -53,6 +56,27 @@ async def shutdown():
     """
     for cafe in cafes:
         await cafe.req.close()
+
+
+async def help_text(channel: str):
+    output = "\n".join(
+        [
+            "Flavorbot Usage Guide:",
+            "Construct your message in the following format: '@Benbot {cafe (optional)} lunch {day (optional)}.'",
+            "For example, to get the default cafe's menu for today, you can simply type '@Benbot lunch'.",
+            "To get the menu for HQ on Friday, you can type '@Benbot hq lunch Friday'.",
+            "The following are valid cafes:",
+            " - " + ", ".join(CONFIG["cafes"].keys()),
+            "The following are valid days:",
+            " - Today, Tomorrow, Yesterday, Monday, Tuesday, Wednesday, Thursday, Friday, Week"
+        ]
+    )
+    return web_client.chat_postMessage(
+        channel=channel,
+        text=output,
+        icon_url=choice(CONFIG['guy_fieri_images']),
+        username='Flavorbot'
+    )
 
 
 def parse_message_for_day(text: str, utc_offset: int = 0) -> Optional[List[date]]:
