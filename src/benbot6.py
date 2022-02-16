@@ -62,9 +62,12 @@ async def help_text(channel: str):
     output = "\n".join(
         [
             "Flavorbot Usage Guide:",
-            "Construct your message in the following format: '@Benbot {cafe (optional)} lunch {day (optional)}.'",
-            "For example, to get the default cafe's menu for today, you can simply type '@Benbot lunch'.",
-            "To get the menu for HQ on Friday, you can type '@Benbot hq lunch Friday'.",
+            "Construct your message in the following format: ",
+            "'@Benbot {cafe (optional)} lunch {day (optional)}.'",
+            "For example, to get the default cafe's menu for today, you can simply type:",
+            "'@Benbot lunch'",
+            "To get the menu for HQ on Friday, you can type:",
+            "'@Benbot hq lunch Friday'",
             "The following are valid cafes:",
             " - " + ", ".join(CONFIG["cafes"].keys()),
             "The following are valid days:",
@@ -157,6 +160,7 @@ async def post_meal(meal_type: str, channel: str, text: str) -> None:
         post_message(
             f"I'm sure it'll be {choice(CONFIG['guy_fieri_phrases'])}, but I've got no idea what's for "
             f"{meal_type}{text.lower().split(meal_type)[1] or ''}"
+            "\nFor a usage guide, type '@Benbot help'"
         )
     else:
         data = await asyncio.gather(*[get_data(date_) for date_ in when])
