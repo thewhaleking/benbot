@@ -54,7 +54,7 @@ async def shutdown():
     """
     Executed at app shutdown
     """
-    for cafe in cafes:
+    for cafe in cafes.values():
         await cafe.req.close()
 
 
