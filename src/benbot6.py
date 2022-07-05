@@ -147,11 +147,15 @@ async def post_meal(meal_type: str, channel: str, text: str) -> None:
         )
 
     async def get_data(date_: date) -> Tuple[str, str, str, str]:
+        try:
+            items = await cafe.menu_items(date_.strftime("%Y-%m-%d"))
+        except LookupError:
+            items = f"Unable to retrieve menu items."
         return (
             meal_type,
             cafe.cafe_name,
             date_.strftime('%m/%d/%Y'),
-            await cafe.menu_items(date_.strftime("%Y-%m-%d"))
+            items
         )
 
     cafe, utc_offset = get_cafe(text)

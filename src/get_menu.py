@@ -38,7 +38,7 @@ class Cafe:
             for line in lines:
                 if "Bamco.menu_items" in line:
                     return json.loads(line.split("= ")[1][:-1])
-            raise Exception("Unable to find ")
+            raise LookupError
 
     async def menu_items(self, date_) -> str:
         """
