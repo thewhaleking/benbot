@@ -90,7 +90,10 @@ def parse_message_for_day(text: str, utc_offset: int = 0) -> Optional[List[date]
     :param utc_offset: UTC offset for the time zone of the café in question
     """
     today = (datetime.now(timezone.utc) + timedelta(hours=utc_offset)).date()
-    week_start = today - timedelta(today.weekday())
+    if (week_day := today.weekday()) in {5, 6}:
+        week_start = today + timedelta(days=7-week_day)
+    else:
+        week_start = today - timedelta(days=week_day)
     day_mappings = {
         'TODAY': [today],
         'TOMORROW': [today + timedelta(days=1)],
