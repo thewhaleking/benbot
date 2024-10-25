@@ -3,4 +3,4 @@ cachetools==5.0.0
 slack-sdk==3.13.0
 PyYAML==6.0
 requests
-Quart==0.16.2
+Quart==0.19.7
